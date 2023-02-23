@@ -2,7 +2,6 @@ namespace Shorty.Web.Controllers;
 
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Shorty.Application.Shorthands.Commands.CreateShorthand;
 using Shorty.Application.Shorthands.Commands.DeleteOutdatedShorthands;
 using Shorty.Application.Shorthands.Commands.DeleteShorthand;
 using Shorty.Application.Shorthands.Commands.UpdateShorthand;
@@ -12,18 +11,21 @@ using Shorty.Application.Shorthands.Queries.GetShorthand;
 [Route("s")]
 public class ShorthandController : ControllerBase
 {
-    private readonly ISender mediatr;
+    private readonly ISender mediator;
 
-    public ShorthandController(ISender mediatr)
+    public ShorthandController(ISender mediator)
     {
-        this.mediatr = mediatr ?? throw new ArgumentNullException(nameof(mediatr));
+        this.mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
     }
 
-    [HttpGet("{url}")]
-    public async Task<ActionResult> Get([FromRoute] string url)
+    [HttpGet("{id}")]
+    public async Task<ActionResult> Get([FromRoute] string id)
     {
-        this.mediatr.Send(new DeleteOutdatedShorthandsCommand());
-        var result = await this.mediatr.Send(new GetShorthandQuery { Id = url });
+#pragma warning disable CS4014
+        // This is not awaited, as a temporary work around.
+        this.mediator.Send(new DeleteOutdatedShorthandsCommand());
+#pragma warning restore CS4014
+        var result = await this.mediator.Send(new GetShorthandQuery { Id = id });
 
         return this.Redirect(result);
     }
